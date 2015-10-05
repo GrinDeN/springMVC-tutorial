@@ -2,7 +2,10 @@ package com.packt.webstore.domain.repository.impl;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.stereotype.Repository;
 
@@ -58,6 +61,64 @@ public class InMemoryProductRepository implements ProductRepository {
 			throw new IllegalArgumentException("Brak produktu o wskazanym id: " + productId);
 		}
 		return productById;
+	}
+
+	public List<Product> getProductByCategory(String category) {
+		List<Product> categoryProducts = new ArrayList<Product>();
+		for (Product product : listOfProducts) {
+			if (category.equalsIgnoreCase(product.getCategory())) {
+				categoryProducts.add(product);
+			}
+		}
+		return categoryProducts;
+	}
+
+	public Set<Product> getProductsByFilter(Map<String, List<String>> filterParams) {
+		Set<Product> productsByBrand = new HashSet<Product>();
+		Set<Product> productsByCategory = new HashSet<Product>();
+		Set<String> criterias = filterParams.keySet();
+		if (criterias.contains("brand")) {
+			for (String brandName : filterParams.get("brand")) {
+				for (Product product : listOfProducts) {
+					if (brandName.equalsIgnoreCase(product.getManufacturer())) {
+						productsByBrand.add(product);
+					}
+				}
+			}
+		}
+		if (criterias.contains("category")) {
+			for (String category : filterParams.get("category")) {
+				productsByCategory.addAll(this.getProductByCategory(category));
+			}
+		}
+		productsByCategory.retainAll(productsByBrand);
+		return productsByCategory;
+	}
+
+	public List<Product> getProductsByManufaturer(String manufacturer) {
+		List<Product> manufacturerProducts = new ArrayList<Product>();
+		for (Product product : listOfProducts) {
+			if (manufacturer.equalsIgnoreCase(product.getManufacturer())) {
+				manufacturerProducts.add(product);
+			}
+		}
+		return manufacturerProducts;
+	}
+
+	public List<Product> getProductsByPriceFilter(Map<String, String> priceFilter) {
+		List<Product> productsWithPrice = new ArrayList<Product>();
+		Set<String> criterias = priceFilter.keySet();
+		if (criterias.contains("low") && criterias.contains("high")) {
+//			BigDecimal lowPrice = new BigDecimal(priceFilter.get("low"));
+//			BigDecimal highPrice = new BigDecimal(priceFilter.get("high"));
+//			for (Product product : listOfProducts) {
+//				if (lowPrice.compareTo(product.getUnitPrice()) == 1
+//						&& highPrice.compareTo(product.getUnitPrice()) == -1) {
+//					productsWithPrice.add(product);
+//				}
+//			}
+		}
+		return productsWithPrice;
 	}
 
 }
